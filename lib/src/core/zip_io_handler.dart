@@ -11,7 +11,7 @@ class ZipIoHandler implements IZipIoHandler {
 
   @override
   void close() {
-    print('zip closed');
+    // print('zip closed');
   }
 
   @override
@@ -28,7 +28,7 @@ class ZipIoHandler implements IZipIoHandler {
   @override
   void load(String path) {
     archive = ZipDecoder().decodeStream(InputFileStream(path));
-    print('Zip loaded successfully.');
+    // print('Zip loaded successfully.');
   }
 
   @override
@@ -38,5 +38,23 @@ class ZipIoHandler implements IZipIoHandler {
       return utf8.decode(bytes);
     }
     return null;
+  }
+
+  @override
+  List<String> getInnerPathList() {
+    if (archive == null) return [];
+    return archive!.files.map((e) => e.name).toList();
+  }
+
+  @override
+  bool writeAsFile(String name, String outpath) {
+    if (archive == null) return false;
+    final arch = archive!.find(name);
+    if (arch == null) return false;
+    final output = OutputFileStream(outpath);
+    arch.writeContent(output);
+
+    output.closeSync();
+    return true;
   }
 }

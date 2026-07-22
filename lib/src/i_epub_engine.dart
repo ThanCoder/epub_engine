@@ -4,5 +4,8 @@ abstract class IEpubEngine {
   void open(String path);
   void dispose();
 
+  String? getContentOpfString();
+  String? getTableOfContentString();
+
   CoreEngine get core;
 }

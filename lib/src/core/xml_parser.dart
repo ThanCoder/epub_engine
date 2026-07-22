@@ -3,7 +3,7 @@ import 'package:xml/xml.dart';
 
 class XmlParser implements IXmlParser {
   const XmlParser();
-  
+
   @override
   List<XmlElement> findAllElements(String xmlContent, String tagName) {
     final xml = XmlDocument.parse(xmlContent);
@@ -13,7 +13,11 @@ class XmlParser implements IXmlParser {
 
   @override
   String? getAttribute(XmlElement element, String attributeName) {
-    return element.getAttribute(attributeName);
+    final res = element.getAttribute(attributeName);
+    if (res != null) {
+      return res.trim();
+    }
+    return null;
   }
 
   @override
@@ -25,7 +29,7 @@ class XmlParser implements IXmlParser {
     final xml = XmlDocument.parse(xmlContent);
     final ele = xml.findAllElements(tagName).firstOrNull;
     if (ele != null) {
-      return ele.getAttribute(attributeName);
+      return ele.getAttribute(attributeName)?.trim();
     }
     return null;
   }
@@ -35,7 +39,7 @@ class XmlParser implements IXmlParser {
     final xml = XmlDocument.parse(xmlContent);
     final ele = xml.findAllElements(tagName).firstOrNull;
     if (ele != null) {
-      return ele.innerText;
+      return ele.innerText.trim();
     }
     return null;
   }

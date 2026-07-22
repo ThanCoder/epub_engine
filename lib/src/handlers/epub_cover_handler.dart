@@ -9,7 +9,7 @@ mixin EpubCoverHandler on IEpubEngine {
   /// Supported -> `v2`,`v3`
   ///
   ///
-  bool saveAsCoverPath(String outPath) {
+  bool writeAsCoverFile(String outPath) {
     final bytes = getCoverData();
     if (bytes != null) {
       final file = File(outPath);
@@ -24,54 +24,71 @@ mixin EpubCoverHandler on IEpubEngine {
   /// Supported -> `v2`,`v3`
   ///
   Uint8List? getCoverData() {
-    final content = core.zipIoHandler.getFileContent('OEBPS/content.opf');
+    String innerPath = '';
+    for (var path in core.zipIoHandler.getInnerPathList()) {
+      if (path.endsWith('content.opf')) {
+        innerPath = path;
+        break;
+      }
+    }
+
+    if (innerPath.isEmpty) return null;
+
+    final content = core.zipIoHandler.getFileContent(innerPath);
     if (content == null) return null;
 
     String? targetHref;
     String? coverIdFromMeta;
 
-    // --- အဆင့် ၁။ XML ရဲ့ item tags တွေနဲ့ meta tags တွေကို အရင် loop ပတ်ပြီး data စုမယ် ---
+    // --- အဆင့် ၁။ Namespace ပါ/မပါ Element များကို စုဆောင်းခြင်း ---
+    var items = core.xmlParser.findAllElements(content, 'item');
+    if (items.isEmpty) {
+      items = core.xmlParser.findAllElements(content, 'opf:item');
+    }
 
-    // V3 အတွက် item tags တွေကို စစ်မယ်
-    final items = core.xmlParser.findAllElements(content, 'item');
-    // V2 အတွက် meta tags တွေကို စစ်မယ်
-    final metas = core.xmlParser.findAllElements(content, 'meta');
+    var metas = core.xmlParser.findAllElements(content, 'meta');
+    if (metas.isEmpty) {
+      metas = core.xmlParser.findAllElements(content, 'opf:meta');
+    }
 
-    // နည်းလမ်း (က) EPUB 3 Standard အရင်ရှာမယ်
+    // နည်းလမ်း (က) EPUB 3 Standard (properties="cover-image")
     for (var ele in items) {
       final properties = ele.getAttribute('properties');
-      if (properties != null && properties == 'cover-image') {
+      if (properties != null && properties.contains('cover-image')) {
         targetHref = ele.getAttribute('href');
-        break; // ရှာတွေ့ရင် loop ထဲက တန်းထွက်မယ်
+        break;
       }
     }
 
-    // နည်းလမ်း (ခ) EPUB 3 မတွေ့ရင် EPUB 2 Standard ကို ရှာမယ်
+    // နည်းလမ်း (ခ) EPUB 2 Standard (<meta name="cover" content="id_or_filename" />)
     if (targetHref == null) {
       for (var ele in metas) {
         final attrName = ele.getAttribute('name');
-        if (attrName != null && attrName == 'cover') {
-          coverIdFromMeta = ele.getAttribute(
-            'content',
-          ); // ဒါက ID ဖြစ်နိုင်သလို ဖိုင်နာမည်လည်း ဖြစ်နိုင်တယ်
-          break;
+        if (attrName == 'cover') {
+          coverIdFromMeta = ele.getAttribute('content');
+          if (coverIdFromMeta != null && coverIdFromMeta.isNotEmpty) {
+            break;
+          }
         }
       }
 
       if (coverIdFromMeta != null) {
-        // ရလာတဲ့ ID နဲ့ ကိုက်ညီတဲ့ item ရဲ့ href ကို manifest ထဲမှာ ပြန်ရှာမယ်
         for (var ele in items) {
           final id = ele.getAttribute('id');
           final href = ele.getAttribute('href');
+          final mediaType = ele.getAttribute('media-type') ?? '';
 
-          // standard အတိုင်း ID နဲ့ တိုက်စစ်တာ
-          if (id != null && id == coverIdFromMeta) {
+          // XHTML/HTML ဖိုင် မဟုတ်ဘဲ Image ဖိုင်ဖြစ်မှသာ ယူမည်
+          final isImage = mediaType.startsWith('image/');
+
+          // Standard ID match
+          if (id == coverIdFromMeta && isImage) {
             targetHref = href;
             break;
           }
 
-          // အခုနက မိတ်ဆွေပြတဲ့ စာအုပ်လို Non-standard (content ထဲ ဖိုင်နာမည် တန်းထည့်ထားရင်) စစ်ဖို့
-          if (href != null && href.endsWith(coverIdFromMeta)) {
+          // Non-standard filename match
+          if (href != null && href.endsWith(coverIdFromMeta) && isImage) {
             targetHref = href;
             break;
           }
@@ -79,17 +96,35 @@ mixin EpubCoverHandler on IEpubEngine {
       }
     }
 
-    // --- အဆင့် ၂။ ရလာတဲ့ href ကို တကယ့် ZIP Path အမှန်အဖြစ် ပြောင်းလဲခြင်း ---
+    // နည်းလမ်း (ဂ) Fallback - Standard မလိုက်နာပါက ID သို့မဟုတ် HREF ထဲတွင် cover ပါသော Image ကို ရှာမည်
+    if (targetHref == null) {
+      for (var ele in items) {
+        final id = (ele.getAttribute('id') ?? '').toLowerCase();
+        final href = (ele.getAttribute('href') ?? '').toLowerCase();
+        final mediaType = (ele.getAttribute('media-type') ?? '').toLowerCase();
+
+        if (mediaType.startsWith('image/') &&
+            (id.contains('cover') || href.contains('cover'))) {
+          targetHref = ele.getAttribute('href');
+          break;
+        }
+      }
+    }
+
     if (targetHref == null) return null;
 
-    // ပုံသေ OEBPS/Images လို့ မပေးဘဲ opf ဖိုင်ရဲ့ တကယ့် အရှေ့က parent path အတိုင်း တွက်ချက်တာက ပိုစိတ်ချရပါတယ်
-    // ဥပမာ - 'OEBPS/content.opf' -> 'OEBPS'
-    final opfParent = 'OEBPS';
+    // --- အဆင့် ၂။ Path Normalization & Full ZIP Path Building ---
 
-    // လမ်းကြောင်းအပြည့်အစုံ ဆောက်မယ်
-    final fullImagePath = '$opfParent/$targetHref';
+    // URL Encode ဖြုတ်ခြင်း (ဥပမာ- %20 -> space) နှင့် Windows Separator ပြင်ခြင်း
+    targetHref = Uri.decodeFull(targetHref).replaceAll('\\', '/');
 
-    // စာအုပ်အချို့မှာ path စောင်းတာတွေ (/ သို့မဟုတ် \) ရှင်းအောင် လိုအပ်ရင် normalize လုပ်နိုင်ပါတယ်
+    final lastSlashIndex = innerPath.lastIndexOf('/');
+    final opfParentDir = (lastSlashIndex != -1)
+        ? innerPath.substring(0, lastSlashIndex + 1)
+        : '';
+
+    final fullImagePath = '$opfParentDir$targetHref';
+
     return core.zipIoHandler.getFileBytes(fullImagePath);
   }
 }

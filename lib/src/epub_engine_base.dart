@@ -2,10 +2,22 @@
 import 'package:epub_engine/src/core/core_engine.dart';
 import 'package:epub_engine/src/handlers/epub_book_handler.dart';
 import 'package:epub_engine/src/handlers/epub_chapter_handler.dart';
+import 'package:epub_engine/src/handlers/epub_content_handler.dart';
 import 'package:epub_engine/src/handlers/epub_cover_handler.dart';
+import 'package:epub_engine/src/handlers/font_handler.dart';
+import 'package:epub_engine/src/handlers/style_handler.dart';
+import 'package:epub_engine/src/handlers/table_of_content_handler.dart';
 import 'package:epub_engine/src/i_epub_engine.dart';
 
-class EpubEngine extends IEpubEngine with EpubBookHandler,EpubCoverHandler,EpubChapterHandler {
+class EpubEngine extends IEpubEngine
+    with
+        EpubContentHandler,
+        EpubBookHandler,
+        EpubCoverHandler,
+        EpubChapterHandler,
+        FontHandler,
+        StyleHandler,
+        TableOfContentHandler {
   @override
   CoreEngine core = CoreEngine();
 

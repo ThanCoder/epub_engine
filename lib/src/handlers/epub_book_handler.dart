@@ -3,7 +3,7 @@ import 'package:epub_engine/src/models/epub_book.dart';
 
 mixin EpubBookHandler on IEpubEngine {
   EpubBook? getBook() {
-    final content = core.zipIoHandler.getFileContent('OEBPS/content.opf');
+    final content = getContentOpfString();
     if (content == null) return null;
     final language = core.xmlParser.queryTagValue(content, 'dc:language');
     final title = core.xmlParser.queryTagValue(content, 'dc:title');

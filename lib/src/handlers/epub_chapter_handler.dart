@@ -3,7 +3,7 @@ import 'package:epub_engine/src/models/book_chapter_item.dart';
 
 mixin EpubChapterHandler on IEpubEngine {
   List<BookChapterItem> getChapters() {
-    final content = core.zipIoHandler.getFileContent('OEBPS/content.opf');
+    final content = getContentOpfString();
     if (content == null) return [];
 
     List<BookChapterItem> list = [];

@@ -6,6 +6,8 @@ abstract class IZipIoHandler {
   void load(String path);
   Uint8List? getFileBytes(String innerPath);
   String? getFileContent(String innerPath);
+  List<String> getInnerPathList();
+  bool writeAsFile(String name, String outpath);
   void close();
 }
 

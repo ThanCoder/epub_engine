@@ -1,26 +1,33 @@
 // ignore_for_file: unused_import
 
+import 'dart:io';
+
 import 'package:archive/archive.dart';
 import 'package:archive/archive_io.dart';
 import 'package:epub_engine/epub_engine.dart';
+import 'package:epub_engine/src/utils/epub_thumbnail_worker.dart';
 import 'package:xml/xml.dart';
 
 void main() async {
-  final path = '/home/thancoder/Documents/epub/ဝါးမြိုခြင်းစာအုပ်_စ_ဆုံး.epub';
-  // final archive = ZipDecoder().decodeStream(InputFileStream(path));
-  // for (var file in archive) {
-  //   if (!file.isFile) continue;
-  //   print('name: ${file.name} - isFile: ${file.isFile}');
-  // }
+  final dir = Directory('/home/thancoder/Downloads/Telegram Desktop');
+  final outDir = Directory(
+    '/home/thancoder/projects/dart_packages/epub_engine/out',
+  );
+  if (!outDir.existsSync()) {
+    outDir.createSync();
+  }
+  final files = dir.listSync(followLinks: false);
+  final ep = EpubEngine();
+  ep.open(files.first.path);
+  print('path: ${files.first.path}');
+  print(ep.getBook());
+  print(ep.getFonts());
+  print(ep.getTableOfContent());
+  print(ep.getChapters());
 
-  final epub = EpubEngine();
-  epub.open(path);
-  final list = epub.getChapters();
-  print('content: ${epub.getChapterContent(list.first)!.length}');
-
-  // print(epub.getBook());
-  // print('data: ${epub.getCoverData()}');
-  // print('save cover: ${epub.saveAsCoverPath('test.png')}');
-
-  epub.dispose();
+  // final name = files.first.path.split('/').last;
+  // await EpubThumbnailWorker.getInstance.generate(
+  //   files.first.path,
+  //   '${outDir.path}/$name',
+  // );
 }
