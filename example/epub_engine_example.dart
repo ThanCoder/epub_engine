@@ -9,21 +9,15 @@ import 'package:epub_engine/src/utils/epub_thumbnail_worker.dart';
 import 'package:xml/xml.dart';
 
 void main() async {
-  final dir = Directory('/home/thancoder/Downloads/Telegram Desktop');
-  final outDir = Directory(
-    '/home/thancoder/projects/dart_packages/epub_engine/out',
-  );
-  if (!outDir.existsSync()) {
-    outDir.createSync();
-  }
-  final files = dir.listSync(followLinks: false);
+  final path =
+      '/home/thancoder/Documents/Docs/epub/ဆရာကြီးဦးရွှေအောင်၊_အမြင်များပြောင်းလဲခြင်းနှင့်အတွေးအမြင်စာစုများ.epub';
   final ep = EpubEngine();
-  ep.open(files.first.path);
-  print('path: ${files.first.path}');
-  print(ep.getBook());
-  print(ep.getFonts());
-  print(ep.getTableOfContent());
-  print(ep.getChapters());
+  ep.open(path);
+  final items = ep.getChapters();
+  for (var ch in items) {
+    print(ch);
+  }
+  print(ep.getChapterContent(items.first));
 
   // final name = files.first.path.split('/').last;
   // await EpubThumbnailWorker.getInstance.generate(

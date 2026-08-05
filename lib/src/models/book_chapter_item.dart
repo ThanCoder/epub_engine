@@ -1,9 +1,9 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 class BookChapterItem {
-  final String path;
-  final String name;
-  const BookChapterItem({required this.path, required this.name});
+  final String id;
+  final String href;
+  const BookChapterItem({required this.id, required this.href});
 
   @override
-  String toString() => 'BookChapterItem(path: $path, name: $name)';
+  String toString() => 'BookChapterItem(id: $id, href: $href)';
 }
