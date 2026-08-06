@@ -231,10 +231,10 @@ class EpubContextLoader {
   }
 
   /// load toc
-  List<EpubTocItem> loadToc(String opfContent) {
-    if (opfContent.isEmpty) return const [];
+  List<EpubTocItem> loadToc(String ncxContent) {
+    if (ncxContent.isEmpty) return const [];
 
-    final xml = XmlDocument.parse(opfContent);
+    final xml = XmlDocument.parse(ncxContent);
 
     const ncxNs = 'http://www.daisy.org/z3986/2005/ncx/';
 

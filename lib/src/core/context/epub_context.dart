@@ -13,7 +13,7 @@ class EpubContext {
   final String mimetype;
 
   final EpubInfo info;
-
+  
   final Map<String, EpubManifestItem> manifest;
 
   final List<EpubSpineItem> spine;

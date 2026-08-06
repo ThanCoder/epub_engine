@@ -18,6 +18,15 @@ class EpubEngine {
   /// Epub Chapter List
   List<EpubChapter> get chapters => _core.getChapters();
 
+  /// Epub Manifest Items
+  Map<String, EpubManifestItem> get manifest => _core.ctx.manifest;
+
+  /// Epub Table of Contents
+  List<EpubTocItem> get toc => _core.ctx.toc;
+
+  /// Epub Reading Order
+  List<EpubSpineItem> get spine => _core.ctx.spine;
+
   /// Close Book
   void dispose() {
     _core.dispose();
@@ -32,11 +41,15 @@ class EpubEngine {
     return _core.open(path);
   }
 
+  /// Epub Chapter List
+  /// 
   /// Get Chapter Content
   Future<String?> getChapterContent(EpubChapter chapter) async =>
       await _core.getChapterContent(chapter);
 
   /// Get Toc Content
+  ///
+  /// Epub Table of Contents
   Future<String?> getTocContent(EpubTocItem item) async =>
       await _core.getTocContent(item);
 

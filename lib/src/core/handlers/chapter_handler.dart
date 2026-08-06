@@ -11,8 +11,7 @@ mixin ChapterHandler on IEpubCoreEngine {
     if (ctx.opfParentPath.isNotEmpty) {
       zipPath = '${ctx.opfParentPath}/${chapter.href}';
     }
-    print(zipPath);
-    // final res = zipIoHandler.getFileContent(zipPath);
+
     final path = this.path;
     return await Isolate.run(() {
       final zip = ZipIoHandler();
