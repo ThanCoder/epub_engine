@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 class EpubChapter {
   final String id;
   final String href;
@@ -17,5 +16,25 @@ class EpubChapter {
   @override
   String toString() {
     return 'EpubChapter(id: $id, href: $href, mediaType: $mediaType, index: $index, linear: $linear)';
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'id': id,
+      'href': href,
+      'mediaType': mediaType,
+      'index': index,
+      'linear': linear,
+    };
+  }
+
+  factory EpubChapter.fromMap(Map<String, dynamic> map) {
+    return EpubChapter(
+      id: map['id'] as String,
+      href: map['href'] as String,
+      mediaType: map['mediaType'] as String,
+      index: map['index'] as int,
+      linear: map['linear'] as bool,
+    );
   }
 }

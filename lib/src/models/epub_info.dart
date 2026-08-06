@@ -13,6 +13,7 @@
 ///
 /// ```
 class EpubInfo {
+  final String? version;
   final String? language;
   final String? title;
   final String? creator;
@@ -24,6 +25,7 @@ class EpubInfo {
   final String? cover;
 
   const EpubInfo({
+    this.version,
     this.language,
     this.title,
     this.creator,
@@ -37,6 +39,6 @@ class EpubInfo {
 
   @override
   String toString() {
-    return 'EpubInfo(language: $language, title: $title, creator: $creator, creatorRole: $creatorRole, identifier: $identifier, identifierScheme: $identifierScheme, date: $date, dateEvent: $dateEvent, cover: $cover)';
+    return 'EpubInfo(version: $version, language: $language, title: $title, creator: $creator, creatorRole: $creatorRole, identifier: $identifier, identifierScheme: $identifierScheme, date: $date, dateEvent: $dateEvent, cover: $cover)';
   }
 }

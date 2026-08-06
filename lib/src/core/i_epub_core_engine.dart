@@ -1,39 +1,22 @@
-import 'dart:typed_data';
-
-import 'package:archive/archive.dart';
-import 'package:epub_engine/src/core/epub_context.dart';
-import 'package:xml/xml.dart';
-
-abstract class IZipIoHandler {
-  void load(
-    String path, {
-    String? password,
-    void Function(ArchiveFile entry)? callback,
-  });
-  Uint8List? getFileBytes(String innerPath);
-  String? getFileContent(String innerPath);
-  List<String> getInnerPathList();
-  bool writeAsFile(String name, String outpath);
-  void close();
-}
-
-abstract class IXmlParser {
-  List<XmlElement> findAllElements(String xmlContent, String tagName);
-  String? queryTagValue(String xmlContent, String tagName);
-  String? queryAttribute(
-    String xmlContent,
-    String tagName,
-    String attributeName,
-  );
-  String? getAttribute(XmlElement element, String attributeName);
-}
+import 'package:epub_engine/src/core/context/epub_context.dart';
+import 'package:epub_engine/src/core/zip_io_handler.dart';
 
 abstract class IEpubCoreEngine {
-  void open(String path, {String? password});
+  String get path;
+
+  /// ### Open Book
+  ///
+  /// Return -> `bool`
+  ///
+  /// `true` ? `opened` : `open failed!`
+  Future<bool> open(String path, {String? password});
+  bool openSync(String path, {String? password});
+
+  /// ### Close Book
   void dispose();
 
+  /// Book Context
   EpubContext get ctx;
 
-  IZipIoHandler get zipIoHandler;
-  IXmlParser get xmlParser;
+  ZipIoHandler get zipAsynIo;
 }

@@ -4,58 +4,84 @@ import 'dart:typed_data';
 
 import 'package:epub_engine/epub_engine.dart';
 import 'package:epub_engine/src/core/core_engine.dart';
-import 'package:epub_engine/src/core/epub_context.dart';
-import 'package:epub_engine/src/models/epub_toc_item.dart';
+import 'package:epub_engine/src/core/context/epub_context.dart';
 
 class EpubEngine {
   final _core = CoreEngine();
 
+  /// ### Book Context
   EpubContext get ctx => _core.ctx;
 
-  /// Get Chapter Content
-  String getChapterContent(EpubChapter chapter) =>
-      _core.getChapterContent(chapter);
-
-  /// Get Toc Content
-  String? getTocContent(EpubTocItem item) => _core.getTocContent(item);
-
-  /// Epub Chapter List
-  List<EpubChapter> get getChapters => _core.getChapters();
-
+  /// Epub Book Info
   EpubInfo get info => _core.ctx.info;
 
-  /// Cover Bytes
-  Uint8List? get getCoverBytes => _core.getCoverBytes(_core.ctx.info);
+  /// Epub Chapter List
+  List<EpubChapter> get chapters => _core.getChapters();
 
-  /// Return -> `bool` if `true` ? `writed` : `no write`.
-  bool saveAsCoverSync(String outpath, {bool isOverride = true}) {
-    final file = File(outpath);
-    if (!isOverride && file.existsSync()) return false;
-    final bytes = getCoverBytes;
-    if (bytes != null) {
-      file.writeAsBytesSync(bytes);
-    }
-    return true;
+  /// Close Book
+  void dispose() {
+    _core.dispose();
   }
+
+  //*****************ASync Version*********************** */
+
+  /// ### Open Epub Book
+  ///
+  /// Async Version
+  Future<bool> open(String path) async {
+    return _core.open(path);
+  }
+
+  /// Get Chapter Content
+  Future<String?> getChapterContent(EpubChapter chapter) async =>
+      await _core.getChapterContent(chapter);
+
+  /// Get Toc Content
+  Future<String?> getTocContent(EpubTocItem item) async =>
+      await _core.getTocContent(item);
+
+  /// Cover Bytes
+  Future<Uint8List?> get coverBytes async => await _core.coverBytes;
+
+  /// Used Sync Version
+  Uint8List? get coverBytesSync => _core.coverBytesSync;
 
   /// Return -> `bool` if `true` ? `writed` : `no write`.
   Future<bool> saveAsCover(String outpath, {bool isOverride = true}) async {
     final file = File(outpath);
     if (!isOverride && file.existsSync()) return false;
-    final bytes = getCoverBytes;
-    if (bytes != null) {
-      await file.writeAsBytes(bytes);
-    }
-    return true;
+    return await _core.saveAsCover(outpath);
   }
 
-  /// Open Epub Book
-  void open(String path) {
-    _core.open(path);
+  //*****************Sync Version*********************** */
+
+  /// ### Open Epub Book
+  ///
+  /// Open Sync Version
+  ///
+  /// Used Sync Version
+  bool openSync(String path) {
+    return _core.openSync(path);
   }
 
-  /// Close Book
-  void dispose() {
-    _core.dispose();
+  /// Get Chapter Content
+  ///
+  /// Open Sync Version
+  String? getChapterContentSync(EpubChapter chapter) =>
+      _core.getChapterContentSync(chapter);
+
+  /// Get Toc Content
+  ///
+  /// Open Sync Version
+  String? getTocContentSync(EpubTocItem item) => _core.getTocContentSync(item);
+
+  /// Return -> `bool` if `true` ? `writed` : `no write`.
+  ///
+  /// Open Sync Version
+  ///
+  bool saveAsCoverSync(String outpath, {bool isOverride = true}) {
+    final file = File(outpath);
+    if (!isOverride && file.existsSync()) return false;
+    return _core.saveAsCoverSync(outpath);
   }
 }

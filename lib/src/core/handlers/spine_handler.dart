@@ -50,4 +50,5 @@ mixin SpineHandler on IEpubCoreEngine {
 
     return result;
   }
+
 }

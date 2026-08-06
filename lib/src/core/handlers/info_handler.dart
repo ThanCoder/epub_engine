@@ -1,85 +1,74 @@
+import 'dart:isolate';
 import 'dart:typed_data';
 
-import 'package:epub_engine/epub_engine.dart';
 import 'package:epub_engine/src/core/i_epub_core_engine.dart';
-import 'package:xml/xml.dart';
+import 'package:epub_engine/src/core/zip_io_handler.dart';
 
 mixin InfoHandler on IEpubCoreEngine {
-  Uint8List? getCoverBytes(EpubInfo info) {
-    if (info.cover == null) return null;
-    final mani = ctx.manifest[info.cover];
+  /// Get Cover Bytes
+  Future<Uint8List?> get coverBytes async {
+    if (ctx.info.cover == null) return null;
+    final mani = ctx.manifest[ctx.info.cover];
     if (mani == null) return null;
-    String zipPath = mani.href;
+
+    final href = Uri.decodeComponent(mani.href);
+    String zipPath = href;
     if (ctx.opfParentPath.isNotEmpty) {
       zipPath = '${ctx.opfParentPath}/${mani.href}';
     }
-    return zipIoHandler.getFileBytes(zipPath);
+    // return zipIoHandler.getFileBytes(zipPath);
+    final path = this.path;
+    return await Isolate.run(() {
+      final zip = ZipIoHandler();
+      zip.loadSync(path);
+      return zip.getFileBytes(zipPath);
+    });
   }
 
-  /// ```xml
-  ///    <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
-  ///     <dc:language>my</dc:language>
-  ///     <dc:title>ဝါးမျိုခြင်းစာအုပ်</dc:title>
-  ///     <dc:creator opf:role="aut">PSM</dc:creator>
-  ///     <meta name="Sigil version" content="2.1.0"/>
-  ///     <dc:date opf:event="modification" xmlns:opf="http://www.idpf.org/2007/opf">2024-05-04</dc:date>
-  ///     <dc:identifier opf:scheme="UUID" id="BookId">urn:uuid:8906e440-08a1-4d25-8240-a02be5200ea2</dc:identifier>
-  ///     <meta name="cover" content="a-1.jpg"/>
-  ///   </metadata>
-  ///
-  /// ```
-  EpubInfo loadInfo(String opfContent) {
-    final xml = XmlDocument.parse(opfContent);
+  /// Save as Cover
+  Future<bool> saveAsCover(String outpath) async {
+    if (ctx.info.cover == null) return false;
+    final mani = ctx.manifest[ctx.info.cover];
+    if (mani == null) return false;
 
-    const dcNs = 'http://purl.org/dc/elements/1.1/';
-    const opfNs = 'http://www.idpf.org/2007/opf';
-
-    final metadata = xml
-        .findAllElements('metadata', namespaceUri: opfNs)
-        .firstOrNull;
-
-    if (metadata == null) return .new();
-
-    String? text(String name) {
-      return metadata
-          .findElements(name, namespaceUri: dcNs)
-          .firstOrNull
-          ?.innerText
-          .trim();
+    final href = Uri.decodeComponent(mani.href);
+    String zipPath = href;
+    if (ctx.opfParentPath.isNotEmpty) {
+      zipPath = '${ctx.opfParentPath}/${mani.href}';
     }
+    // return zipIoHandler.writeAsFile(zipPath, outpath);
+    final path = this.path;
+    return await Isolate.run(() {
+      final zip = ZipIoHandler();
+      zip.loadSync(path);
+      return zip.writeAsFile(zipPath, outpath);
+    });
+  }
+  //****************Sync********************//
 
-    final creator = metadata
-        .findElements('creator', namespaceUri: dcNs)
-        .firstOrNull;
+  Uint8List? get coverBytesSync {
+    if (ctx.info.cover == null) return null;
+    final mani = ctx.manifest[ctx.info.cover];
+    if (mani == null) return null;
 
-    final identifier = metadata
-        .findElements('identifier', namespaceUri: dcNs)
-        .firstOrNull;
-
-    final date = metadata.findElements('date', namespaceUri: dcNs).firstOrNull;
-
-    String? meta({required String name}) {
-      return metadata
-          .findElements('meta', namespaceUri: opfNs)
-          .where((e) => e.getAttribute('name') == name)
-          .firstOrNull
-          ?.getAttribute('content');
+    final href = Uri.decodeComponent(mani.href);
+    String zipPath = href;
+    if (ctx.opfParentPath.isNotEmpty) {
+      zipPath = '${ctx.opfParentPath}/${mani.href}';
     }
+    return zipAsynIo.getFileBytes(zipPath);
+  }
 
-    return EpubInfo(
-      language: text('language'),
-      title: text('title'),
+  bool saveAsCoverSync(String outpath) {
+    if (ctx.info.cover == null) return false;
+    final mani = ctx.manifest[ctx.info.cover];
+    if (mani == null) return false;
 
-      creator: creator?.innerText.trim(),
-      creatorRole: creator?.getAttribute('role', namespaceUri: opfNs),
-
-      identifier: identifier?.innerText.trim(),
-      identifierScheme: identifier?.getAttribute('scheme', namespaceUri: opfNs),
-
-      date: date?.innerText.trim(),
-      dateEvent: date?.getAttribute('event', namespaceUri: opfNs),
-
-      cover: meta(name: 'cover'),
-    );
+    final href = Uri.decodeComponent(mani.href);
+    String zipPath = href;
+    if (ctx.opfParentPath.isNotEmpty) {
+      zipPath = '${ctx.opfParentPath}/${mani.href}';
+    }
+    return zipAsynIo.writeAsFile(zipPath, outpath);
   }
 }

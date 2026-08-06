@@ -1,8 +1,5 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:epub_engine/epub_engine.dart';
-import 'package:epub_engine/src/models/epub_manifest_item.dart';
-import 'package:epub_engine/src/models/epub_spine_item.dart';
-import 'package:epub_engine/src/models/epub_toc_item.dart';
 
 class EpubContext {
   final List<String> zipPathList;

@@ -1,17 +1,23 @@
 # epub_engine
 
-+ [x] `EpubThumbnailWorker`
++ [x] [Epub Cover Worker Example](#epub-cover-worker-example)
 
-## EpubThumbnailWorker Example
+## Epub Cover Worker Example
 ```dart
-for (var file in dir.listSync(followLinks: false)) {
+  final dir = Directory('/home/thancoder/Documents/Docs');
+  final outDir = Directory('${dir.path}/thumbs');
+  if (!outDir.existsSync()) {
+    await outDir.create();
+  }
+
+  for (var file in dir.listSync(followLinks: false)) {
     if (!file.path.endsWith('.epub')) continue;
 
     final name = file.path.split('/').last.split('.').first;
-    final succ = await EpubThumbnailWorker.getInstance.generate(
-        file.path,
-        '${outDir.path}/$name.png',
-    );
+    final nameOnly = name.split('.').first;
+    final outpath = '${outDir.path}/$name.png';
+    final succ = await EpubCoverWorker.getInstance.generate(file.path, outpath);
     print('generated: $succ - $name');
-}
+    print('outpath: $outpath');
+  }
 ```

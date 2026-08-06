@@ -2,31 +2,11 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
-import 'package:epub_engine/src/core/i_epub_core_engine.dart';
 
-class ZipIoHandler implements IZipIoHandler {
-  ZipIoHandler();
+class ZipIoHandler {
+  Archive? archive;
 
-  late Archive? archive;
-
-  @override
-  void close() {
-    // print('zip closed');
-  }
-
-  @override
-  Uint8List? getFileBytes(String innerPath) {
-    for (var file in archive!) {
-      if (!file.isFile) continue;
-      if (file.name == innerPath) {
-        return file.content;
-      }
-    }
-    return null;
-  }
-
-  @override
-  void load(
+  void loadSync(
     String path, {
     String? password,
     void Function(ArchiveFile entry)? callback,
@@ -38,30 +18,56 @@ class ZipIoHandler implements IZipIoHandler {
     );
   }
 
-  @override
-  String? getFileContent(String innerPath) {
-    final bytes = getFileBytes(innerPath);
-    if (bytes != null && bytes.isNotEmpty) {
-      return utf8.decode(bytes);
+  void close() {
+    archive = null;
+  }
+
+  Uint8List? getFileBytes(String innerPath) {
+    final arch = archive;
+    if (arch == null) return null;
+
+    for (final file in arch) {
+      if (!file.isFile) continue;
+
+      if (file.name == innerPath) {
+        return file.content;
+      }
     }
+
     return null;
   }
 
-  @override
-  List<String> getInnerPathList() {
-    if (archive == null) return [];
-    return archive!.files.map((e) => e.name).toList();
+  String? getFileContent(String innerPath) {
+    final bytes = getFileBytes(innerPath);
+
+    if (bytes == null || bytes.isEmpty) {
+      return null;
+    }
+
+    return utf8.decode(bytes);
   }
 
-  @override
-  bool writeAsFile(String name, String outpath) {
-    if (archive == null) return false;
-    final arch = archive!.find(name);
-    if (arch == null) return false;
-    final output = OutputFileStream(outpath);
-    arch.writeContent(output);
+  List<String> getInnerPathList() {
+    final arch = archive;
+    if (arch == null) return [];
 
-    output.closeSync();
-    return true;
+    return arch.files.map((e) => e.name).toList();
+  }
+
+  bool writeAsFile(String innerPath, String outpath) {
+    final arch = archive;
+    if (arch == null) return false;
+
+    final file = arch.find(innerPath);
+    if (file == null) return false;
+
+    final output = OutputFileStream(outpath);
+
+    try {
+      file.writeContent(output);
+      return true;
+    } finally {
+      output.closeSync();
+    }
   }
 }
