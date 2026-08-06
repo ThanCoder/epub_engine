@@ -26,9 +26,16 @@ class ZipIoHandler implements IZipIoHandler {
   }
 
   @override
-  void load(String path) {
-    archive = ZipDecoder().decodeStream(InputFileStream(path));
-    // print('Zip loaded successfully.');
+  void load(
+    String path, {
+    String? password,
+    void Function(ArchiveFile entry)? callback,
+  }) {
+    archive = ZipDecoder().decodeStream(
+      InputFileStream(path),
+      password: password,
+      callback: callback,
+    );
   }
 
   @override

@@ -92,7 +92,7 @@ void _backgroundWorker(SendPort mainSendPort) {
     try {
       final epub = EpubEngine();
       epub.open(path);
-      final res = epub.writeAsCoverFile(outpath);
+      final res = epub.saveAsCoverSync(outpath);
       epub.dispose();
       return res;
     } catch (e) {
