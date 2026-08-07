@@ -6,7 +6,6 @@ import 'package:epub_engine/epub_engine.dart';
 import 'package:epub_engine/src/core/core_engine.dart';
 import 'package:epub_engine/src/core/context/epub_context.dart';
 import 'package:epub_engine/src/core/zip_io_handler.dart';
-import 'package:html/dom.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:path/path.dart';
 

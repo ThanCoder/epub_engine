@@ -11,7 +11,7 @@ import 'package:xml/xml.dart';
 
 void main() async {
   final path =
-      '/home/thancoder/Documents/Docs/epub/သိုးဆောင်း၊ Revenge Story.epub';
+      '/home/thancoder/Documents/ဝိနည်းပိဋက - ပါရာဇိကဏ် ပါဠိတော် မြန်မာပြန်.epub';
 
   final ep = EpubEngine();
   final res = await ep.open(path);
@@ -21,29 +21,31 @@ void main() async {
   final html = await ep.getChapterContent(ch);
   if (html == null) return;
 
-  final resolverList = <CachePathResolver>[];
-  final cachePath = '/home/thancoder/projects/dart_plugins/epub_engine/cache';
+  print('cover: ${await ep.coverBytes}');
 
-  final resHtml = ep.resolveHtmlContent(
-    html,
-    onResolve: (tag, attribute, content) {
-      print('tag: $tag - attribute: $attribute - content: $content');
-      final zipInnerPath = ep.getZipFullpath(content);
-      final cacheFullpath = '$cachePath/$zipInnerPath';
+  // final resolverList = <CachePathResolver>[];
+  // final cachePath = '/home/thancoder/projects/dart_plugins/epub_engine/cache';
 
-      print('zipInnerPath: $zipInnerPath');
-      print('cacheFullpath: $cacheFullpath');
+  // final resHtml = ep.resolveHtmlContent(
+  //   html,
+  //   onResolve: (tag, attribute, content) {
+  //     print('tag: $tag - attribute: $attribute - content: $content');
+  //     final zipInnerPath = ep.getZipFullpath(content);
+  //     final cacheFullpath = '$cachePath/$zipInnerPath';
 
-      final resolver = CachePathResolver(
-        zipInnerPath: zipInnerPath,
-        cacheFullpathPath: cacheFullpath,
-      );
-      resolverList.add(resolver);
-      return resolver.cacheFullpathPath;
-    },
-  );
-  await ep.resolveCaches(resolverList);
+  //     print('zipInnerPath: $zipInnerPath');
+  //     print('cacheFullpath: $cacheFullpath');
 
-  // print(resHtml);
-  await File('test.html').writeAsString(resHtml);
+  //     final resolver = CachePathResolver(
+  //       zipInnerPath: zipInnerPath,
+  //       cacheFullpathPath: cacheFullpath,
+  //     );
+  //     resolverList.add(resolver);
+  //     return resolver.cacheFullpathPath;
+  //   },
+  // );
+  // await ep.resolveCaches(resolverList);
+
+  // // print(resHtml);
+  // await File('test.html').writeAsString(resHtml);
 }

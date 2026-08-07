@@ -174,12 +174,18 @@ class EpubContextLoader {
       final id = item.getAttribute('id');
       final href = item.getAttribute('href');
       final mediaType = item.getAttribute('media-type');
+      final properties = item.getAttribute('properties');
 
       if (id == null || href == null || mediaType == null) {
         continue;
       }
 
-      manifest[id] = EpubManifestItem(id: id, href: href, mediaType: mediaType);
+      manifest[id] = EpubManifestItem(
+        id: id,
+        href: href,
+        mediaType: mediaType,
+        properties: properties,
+      );
     }
   }
 
