@@ -22,6 +22,7 @@ void main() async {
   if (html == null) return;
 
   print('cover: ${await ep.coverBytes}');
+  // ep.saveAsCoverSync(outpath)
 
   // final resolverList = <CachePathResolver>[];
   // final cachePath = '/home/thancoder/projects/dart_plugins/epub_engine/cache';

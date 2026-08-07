@@ -6,8 +6,7 @@ import 'package:epub_engine/src/core/i_epub_core_engine.dart';
 import 'package:epub_engine/src/core/zip_io_handler.dart';
 
 mixin InfoHandler on IEpubCoreEngine {
-  /// Get Cover Bytes
-  Future<Uint8List?> get coverBytes async {
+  EpubManifestItem? get _coverItem {
     EpubManifestItem? mani;
 
     /// cover ရှိရင် mani ထဲထည့်
@@ -24,13 +23,17 @@ mixin InfoHandler on IEpubCoreEngine {
         }
       }
     }
+    return mani;
+  }
 
-    if (mani == null) return null;
+  /// Get Cover Bytes
+  Future<Uint8List?> get coverBytes async {
+    if (_coverItem == null) return null;
 
-    final href = Uri.decodeComponent(mani.href);
+    final href = Uri.decodeComponent(_coverItem!.href);
     String zipPath = href;
     if (ctx.opfParentPath.isNotEmpty) {
-      zipPath = '${ctx.opfParentPath}/${mani.href}';
+      zipPath = '${ctx.opfParentPath}/${_coverItem!.href}';
     }
     final path = this.path;
     return await Isolate.run(() {
@@ -42,14 +45,12 @@ mixin InfoHandler on IEpubCoreEngine {
 
   /// Save as Cover
   Future<bool> saveAsCover(String outpath) async {
-    if (ctx.info.cover == null) return false;
-    final mani = ctx.manifest[ctx.info.cover];
-    if (mani == null) return false;
+    if (_coverItem == null) return false;
 
-    final href = Uri.decodeComponent(mani.href);
+    final href = Uri.decodeComponent(_coverItem!.href);
     String zipPath = href;
     if (ctx.opfParentPath.isNotEmpty) {
-      zipPath = '${ctx.opfParentPath}/${mani.href}';
+      zipPath = '${ctx.opfParentPath}/${_coverItem!.href}';
     }
     // return zipIoHandler.writeAsFile(zipPath, outpath);
     final path = this.path;
@@ -62,27 +63,23 @@ mixin InfoHandler on IEpubCoreEngine {
   //****************Sync********************//
 
   Uint8List? get coverBytesSync {
-    if (ctx.info.cover == null) return null;
-    final mani = ctx.manifest[ctx.info.cover];
-    if (mani == null) return null;
+    if (_coverItem == null) return null;
 
-    final href = Uri.decodeComponent(mani.href);
+    final href = Uri.decodeComponent(_coverItem!.href);
     String zipPath = href;
     if (ctx.opfParentPath.isNotEmpty) {
-      zipPath = '${ctx.opfParentPath}/${mani.href}';
+      zipPath = '${ctx.opfParentPath}/${_coverItem!.href}';
     }
     return zipAsynIo.getFileBytes(zipPath);
   }
 
   bool saveAsCoverSync(String outpath) {
-    if (ctx.info.cover == null) return false;
-    final mani = ctx.manifest[ctx.info.cover];
-    if (mani == null) return false;
+    if (_coverItem == null) return false;
 
-    final href = Uri.decodeComponent(mani.href);
+    final href = Uri.decodeComponent(_coverItem!.href);
     String zipPath = href;
     if (ctx.opfParentPath.isNotEmpty) {
-      zipPath = '${ctx.opfParentPath}/${mani.href}';
+      zipPath = '${ctx.opfParentPath}/${_coverItem!.href}';
     }
     return zipAsynIo.writeAsFile(zipPath, outpath);
   }
