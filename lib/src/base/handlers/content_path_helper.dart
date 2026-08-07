@@ -3,15 +3,21 @@ part of '../epub_engine_base.dart';
 mixin ContentPathHelper on IEpubEngineBase {
   /// `%20` -> `' '`
   String normalizedPath(String path) {
-    return Uri.decodeComponent(path);
+    return Uri.decodeComponent(path).replaceAll('../', '');
   }
 
   /// content path -> zip fullpath
   String getZipFullpath(String path) {
-    if (_core.ctx.opfParentPath.isNotEmpty) {
-      return normalizedPath('${_core.ctx.opfParentPath}/$path');
+    path = normalizedPath(path);
+    for (var zp in _core.ctx.zipPathList) {
+      if (zp.endsWith(path)) {
+        return zp;
+      }
     }
-    return normalizedPath(path);
+    // if (_core.ctx.opfParentPath.isNotEmpty) {
+    //   return '${_core.ctx.opfParentPath}/$path';
+    // }
+    return path;
   }
 
   String resolveHtmlContent(
@@ -58,13 +64,15 @@ mixin ContentPathHelper on IEpubEngineBase {
           if (content == null || content.isEmpty) {
             continue;
           }
-
-          element.attributes[actualKey] = onResolve(tag, attribute, content);
+          element.attributes.remove(actualKey);
+          element.attributes['src'] = onResolve(tag, attribute, content);
         }
       }
     }
 
-    return document.outerHtml;
+    return document.outerHtml
+        .replaceAll('<image', '<img')
+        .replaceAll('</image>', '<img>');
   }
 
   String resolveCssContent(

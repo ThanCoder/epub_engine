@@ -11,25 +11,29 @@ import 'package:xml/xml.dart';
 
 void main() async {
   final path =
-      '/home/thancoder/Documents/Docs/epub/မူကွဲလမ်းဆုံကဗျာများ၊_ကဗျာဆရာစုံ.epub';
+      '/home/thancoder/Documents/Docs/epub/သိုးဆောင်း၊ Revenge Story.epub';
 
   final ep = EpubEngine();
-  final res = ep.openSync(path);
+  final res = await ep.open(path);
   print('opened: $res');
 
   final ch = ep.chapters.first;
-  final html = ep.getChapterContentSync(ch);
+  final html = await ep.getChapterContent(ch);
   if (html == null) return;
 
   final resolverList = <CachePathResolver>[];
+  final cachePath = '/home/thancoder/projects/dart_plugins/epub_engine/cache';
 
   final resHtml = ep.resolveHtmlContent(
     html,
     onResolve: (tag, attribute, content) {
       print('tag: $tag - attribute: $attribute - content: $content');
       final zipInnerPath = ep.getZipFullpath(content);
-      final cacheFullpath = 'cache/$zipInnerPath';
-      
+      final cacheFullpath = '$cachePath/$zipInnerPath';
+
+      print('zipInnerPath: $zipInnerPath');
+      print('cacheFullpath: $cacheFullpath');
+
       final resolver = CachePathResolver(
         zipInnerPath: zipInnerPath,
         cacheFullpathPath: cacheFullpath,
@@ -40,5 +44,6 @@ void main() async {
   );
   await ep.resolveCaches(resolverList);
 
-  print(resHtml);
+  // print(resHtml);
+  await File('test.html').writeAsString(resHtml);
 }

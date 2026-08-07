@@ -20,6 +20,7 @@ class CoreEngine extends IEpubCoreEngine
 
   @override
   Future<bool> open(String path, {String? password}) async {
+    _path = path;
     EpubContext? ctx = await Isolate.run(() {
       final loader = EpubContextLoader(zipIoHandler: ZipIoHandler());
       if (loader.openSync(path)) {
@@ -30,19 +31,19 @@ class CoreEngine extends IEpubCoreEngine
 
     if (ctx == null) return false;
     this.ctx = ctx;
-    _path = path;
 
     return true;
   }
 
   @override
   bool openSync(String path, {String? password}) {
+    _path = path;
     // zipAsynIo.loadSync(path);
     final loader = EpubContextLoader(zipIoHandler: zipAsynIo);
     if (!loader.openSync(path)) {
       return false;
     }
-    _path = path;
+
     ctx = loader.ctx!;
     return true;
   }
