@@ -14,9 +14,6 @@ mixin ContentPathHelper on IEpubEngineBase {
         return zp;
       }
     }
-    // if (_core.ctx.opfParentPath.isNotEmpty) {
-    //   return '${_core.ctx.opfParentPath}/$path';
-    // }
     return path;
   }
 
