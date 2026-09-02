@@ -8,14 +8,14 @@ void main() async {
 
   eng.open(path);
 
-  print('contentFullpath: ${eng.ctx.contentFullpath}');
-  print('rootPath: ${eng.ctx.rootPath}');
-  print('metadata: ${eng.ctx.metadata}');
+  print('contentFullpath: ${eng.state.contentFullpath}');
+  print('rootPath: ${eng.state.rootPath}');
+  print('metadata: ${eng.state.metadata}');
 
   print('coverPath: ${eng.cover.coverPath}');
   print('cover len: ${eng.cover.bytes?.length}');
 
-  for (var item in eng.ctx.spineItems) {
+  for (var item in eng.state.spineItems) {
     print('item: $item');
     print('manifestItemsIndex: ${item.manifestItemsIndex}');
     print('content len: ${item.content?.length}');

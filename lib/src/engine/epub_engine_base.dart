@@ -7,7 +7,7 @@ import 'package:epub_engine/src/engine/engine_ctx.dart';
 class EpubEngine {
   final _core = EpubCore();
 
-  late final EngineCtx ctx = EngineCtx(_core.ctx);
+  late final EngineCtx state = EngineCtx(_core.ctx);
   late final EngineCover cover = EngineCover(_core);
 
   Result<bool, String> open(String path) {
