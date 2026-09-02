@@ -1,84 +1,119 @@
-import 'package:epub_engine/src/core/epub_ctx.dart';
+import 'package:epub_engine/src/core/epub_core.dart';
+import 'package:epub_engine/src/core/models/epub_manifest_item.dart';
 import 'package:epub_engine/src/core/models/epub_metadata.dart';
+import 'package:epub_engine/src/core/models/epub_spine_item.dart';
 import 'package:epub_engine/src/core/result_t.dart';
 import 'package:epub_engine/src/core/utils/xml_utils.dart';
 import 'package:xml/xml.dart';
 
 class EpubContentParser {
-  static Result<bool, String> parse(EpubCtx ctx, String xmlString) {
+  static const dc = 'http://purl.org/dc/elements/1.1/';
+  static const opf = 'http://www.idpf.org/2007/opf';
+
+  static Result<bool, String> parse(IEpubCore core, String xmlString) {
     try {
       final xml = XmlDocument.parse(xmlString);
-      final meta = xml.findAllElements('metadata').first;
+      final package = xml.rootElement;
 
-      final title = XmlUtils.getInnerText(meta, 'dc:title');
-      final language = XmlUtils.getInnerText(meta, 'dc:language');
-      final creator = XmlUtils.getInnerTextList(meta, 'dc:creator');
-      final contributor = XmlUtils.getInnerText(meta, 'dc:contributor');
-      final identifier = XmlUtils.getInnerTextList(meta, 'dc:identifier');
+      final meta = package.findAllElements('metadata', namespaceUri: opf).first;
+
+      // DC metadata
+      final title = XmlUtils.getInnerText(meta, 'title', namespaceUri: dc);
+
+      final language = XmlUtils.getInnerTextList(
+        meta,
+        'language',
+        namespaceUri: dc,
+      );
+
+      final creator = XmlUtils.getInnerTextList(
+        meta,
+        'creator',
+        namespaceUri: dc,
+      );
+
+      final contributor = XmlUtils.getInnerTextList(
+        meta,
+        'contributor',
+        namespaceUri: dc,
+      );
+
+      final identifier = XmlUtils.getInnerTextList(
+        meta,
+        'identifier',
+        namespaceUri: dc,
+      );
+
+      // OPF <meta>
       final metaItems = meta
-          .findAllElements('meta')
+          .findAllElements('meta', namespaceUri: opf)
           .map(
             (e) => EpubMetaItem(
               name: e.getAttribute('name') ?? '',
               content: e.getAttribute('content') ?? '',
             ),
-          );
+          )
+          .toList();
+
       String coverId = '';
-      for (var meta in metaItems) {
-        if (meta.name == 'cover') {
-          coverId = meta.content;
+
+      for (final item in metaItems) {
+        if (item.name == 'cover') {
+          coverId = item.content;
           break;
         }
       }
-      // set ctx
-      ctx.metadata = .new(
+
+      core.ctx.metadata = .new(
         title: title,
         language: language,
         creators: creator,
         contributor: contributor,
         identifiers: identifier,
-        metaItems: metaItems.toList(),
+        metaItems: metaItems,
         coverId: coverId,
       );
 
-      // print('title: $title');
-      // print('language: $language');
-      // print('creator: $creator');
-      // print('contributor: $contributor');
-      // print('identifier: $identifier');
-      // print('metaItems: $metaItems');
-      _parseManifestItems(ctx, xml);
+      _parseManifestItems(core, xml);
+      _parseSpineItems(core, xml);
 
-      _parseSpineItems(ctx, xml);
       return Ok(true);
     } catch (e) {
       return Err('[EpubContentParser:parse]: $e');
     }
   }
 
-  static void _parseManifestItems(EpubCtx ctx, XmlDocument xml) {
-    final manifestItems = xml.findAllElements('manifest');
-    if (manifestItems.isNotEmpty) {
-      ctx.manifestItems = manifestItems.first
-          .findAllElements('item')
-          .map(
-            (e) => EpubManifestItem(
-              id: e.getAttribute('id') ?? '',
-              href: e.getAttribute('href') ?? '',
-              mediaType: e.getAttribute('media-type') ?? '',
-            ),
-          )
-          .toList();
-    }
+  static void _parseManifestItems(IEpubCore core, XmlDocument xml) {
+    final manifests = xml.findAllElements('manifest', namespaceUri: opf);
+
+    if (manifests.isEmpty) return;
+
+    core.ctx.manifestItems = manifests.first
+        .findAllElements('item', namespaceUri: opf)
+        .map(
+          (e) => EpubManifestItem(
+            epubCore: core,
+            id: e.getAttribute('id') ?? '',
+            href: e.getAttribute('href') ?? '',
+            mediaType: e.getAttribute('media-type') ?? '',
+          ),
+        )
+        .toList();
   }
 
-  static void _parseSpineItems(EpubCtx ctx, XmlDocument xml) {
-    final manifestItems = xml.findAllElements('spine');
-    if (manifestItems.isNotEmpty) {
-      ctx.spineItems = manifestItems.first
-          .findAllElements('itemref')
-          .map((e) => EpubSpineItem(idref: e.getAttribute('idref') ?? ''))
-          .toList();
-    }
+  static void _parseSpineItems(IEpubCore core, XmlDocument xml) {
+    final spines = xml.findAllElements('spine', namespaceUri: opf);
+
+    if (spines.isEmpty) return;
+
+    core.ctx.spineItems = spines.first
+        .findAllElements('itemref', namespaceUri: opf)
+        .map(
+          (e) => EpubSpineItem(
+            epubCore: core,
+            idref: e.getAttribute('idref') ?? '',
+          ),
+        )
+        .toList();
   }
 }

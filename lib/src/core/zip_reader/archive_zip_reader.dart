@@ -16,14 +16,18 @@ class ArchiveZipReader implements IEpubZipReader {
 
   @override
   Uint8List? getContent(String name) {
-    final index = _archive.files.indexWhere((e) => e.name == name);
+    final index = _archive.files.indexWhere(
+      (e) => e.name == Uri.decodeComponent(name),
+    );
     if (index == -1) return null;
     return _archive.files[index].content;
   }
 
   @override
   String? getContentText(String name) {
-    final index = _archive.files.indexWhere((e) => e.name == name);
+    final index = _archive.files.indexWhere(
+      (e) => e.name == Uri.decodeComponent(name),
+    );
     if (index == -1) return null;
     return utf8.decode(_archive.files[index].content);
   }

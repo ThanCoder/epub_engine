@@ -39,10 +39,23 @@ mixin InfoLogic on IEpubCore {
       if (content == null) {
         return Err('[InfoLogic:_parseContent]: content == null');
       }
-      final res = EpubContentParser.parse(ctx, content);
+      final res = EpubContentParser.parse(this, content);
       if (res.isErr) {
         return res;
       }
+      //ncx
+      for (var f in reader.names) {
+        if (!f.endsWith('toc.ncx')) continue;
+        final ncxContent = reader.getContentText(f);
+        if (ncxContent != null) {
+          final res = EpubNcxParser.parse(ncxContent);
+          if (res.isErr) {
+            return Err(res.unwrapError());
+          }
+          ctx.ncx = res.unwrap();
+        }
+      }
+
       return Ok(true);
     } catch (e) {
       return Err(e.toString());

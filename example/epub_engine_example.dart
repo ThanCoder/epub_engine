@@ -1,79 +1,71 @@
-// ignore_for_file: unused_import
-
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:archive/archive_io.dart';
-import 'package:epub_engine/src/core/epub_core.dart';
-import 'package:epub_engine/src/core/models/epub_metadata.dart';
-import 'package:epub_engine/src/core/utils/xml_utils.dart';
-import 'package:xml/xml.dart';
+import 'package:epub_engine/epub_engine.dart';
 
 void main() async {
-  final path = '/home/thancoder/Documents/Docs/သိုးဆောင်း၊ Revenge Story.epub';
-  final core = EpubCore();
-  final res = core.open(path);
-  if (res.isErr) {
-    print('error: ${res.unwrapError()}');
-    return;
+  final path =
+      '/home/thancoder/Documents/EPUB/ဝိဉာဉ်တေးသွားကဗျာများ၊_ရော်ဝါညိန်း.epub';
+
+  final eng = EpubEngine();
+
+  eng.open(path);
+
+  print('contentFullpath: ${eng.ctx.contentFullpath}');
+  print('rootPath: ${eng.ctx.rootPath}');
+  print('metadata: ${eng.ctx.metadata}');
+
+  print('coverPath: ${eng.cover.coverPath}');
+  print('cover len: ${eng.cover.bytes?.length}');
+
+  for (var item in eng.ctx.spineItems) {
+    print('item: $item');
+    print('manifestItemsIndex: ${item.manifestItemsIndex}');
+    print('content len: ${item.content?.length}');
+    // print('contentText: ${item.contentText}');
+    // return;
   }
-  print(core.ctx);
-  print(core.coverPath);
-  print('cover data: ${core.coverBytes?.length}');
+
+  // genAllCover();
 }
 
-void parse() {
-  final text = File('con.xml').readAsStringSync();
-  final xml = XmlDocument.parse(text);
+// void testCore() {
+//   final core = EpubCore();
+//   final res = core.open(path);
+//   if (res.isErr) {
+//     print('error: ${res.unwrapError()}');
+//     return;
+//   }
+//   print(core.ctx);
+//   print('title: ${core.ctx.metadata.title}');
+//   print('coverPath: ${core.coverPath}');
+//   print('cover data: ${core.coverBytes?.length}');
 
-  final meta = xml.findAllElements('metadata').first;
+//   print('ncx: ${core.ctx.ncx}');
+// }
 
-  final title = XmlUtils.getInnerTextList(meta, 'dc:title');
-  final language = XmlUtils.getInnerText(meta, 'dc:language');
-  final creator = XmlUtils.getInnerTextList(meta, 'dc:creator');
-  final contributor = XmlUtils.getInnerText(meta, 'dc:contributor');
-  final identifier = XmlUtils.getInnerTextList(meta, 'dc:identifier');
-  final metaItems = meta
-      .findAllElements('meta')
-      .map(
-        (e) => EpubMetaItem(
-          name: e.getAttribute('name') ?? '',
-          content: e.getAttribute('content') ?? '',
-        ),
-      );
-
-  print('title: $title');
-  print('language: $language');
-  print('creator: $creator');
-  print('contributor: $contributor');
-  print('identifier: $identifier');
-  print('metaItems: $metaItems');
-
-  final manifestItems = xml
-      .findAllElements('manifest')
-      .first
-      .findAllElements('item')
-      .map(
-        (e) => EpubManifestItem(
-          id: e.getAttribute('id') ?? '',
-          href: e.getAttribute('href') ?? '',
-          mediaType: e.getAttribute('media-type') ?? '',
-        ),
-      );
-
-  print('manifestItems:');
-  for (var item in manifestItems) {
-    print(item);
-  }
-
-  final spineItems = xml
-      .findAllElements('spine')
-      .first
-      .findAllElements('itemref')
-      .map((e) => EpubSpineItem(idref: e.getAttribute('idref') ?? ''));
-
-  print('spineItems:');
-  for (var item in spineItems) {
-    print(item);
-  }
-}
+// void genAllCover() {
+//   final dir = Directory('/home/thancoder/Documents/EPUB');
+//   final outDir = Directory('${dir.path}/out');
+//   if (!outDir.existsSync()) {
+//     outDir.createSync(recursive: true);
+//   }
+//   final files = dir.listSync();
+//   int i = 0;
+//   for (var f in files) {
+//     final name = f.path.split('/').last;
+//     if (!name.endsWith('epub')) continue;
+//     final out = '${outDir.path}/$name.png';
+//     final core = EpubCore();
+//     final res = core.open(f.path);
+//     if (res.isErr) {
+//       print('Error: $name - ${res.unwrapError()}');
+//       continue;
+//     }
+//     i++;
+//     print('opend: $i');
+//     final saveRes = core.coverSaveToSync(out);
+//     if (saveRes.isErr) {
+//       print('Error: $name - ${saveRes.unwrapError()}');
+//       continue;
+//     }
+//     print('${saveRes.unwrap() ? 'Saved' : 'Not Save'}: $name - i: $i');
+//   }
+// }

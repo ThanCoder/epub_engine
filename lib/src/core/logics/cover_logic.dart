@@ -12,15 +12,40 @@ mixin CoverLogic on IEpubCore {
     }
 
     final item = ctx.manifestItems[coverItemIndex];
-    if (ctx.rootPath.isNotEmpty) {
-      return '${ctx.rootPath}/${item.href}';
-    }
-    return item.href;
+    return getFullPathByHref(item.href);
   }
 
   Uint8List? get coverBytes {
     final path = coverPath;
     if (path.isEmpty) return null;
     return reader.getContent(path);
+  }
+
+  Result<bool, String> coverSaveToSync(String outpath) {
+    try {
+      final bytes = coverBytes;
+      if (bytes == null) {
+        return Ok(false);
+      }
+      final f = File(outpath);
+      f.writeAsBytesSync(bytes, flush: true);
+      return Ok(true);
+    } catch (e) {
+      return Err(e.toString());
+    }
+  }
+
+  Future<Result<bool, String>> coverSaveTo(String outpath) async {
+    try {
+      final bytes = coverBytes;
+      if (bytes == null) {
+        return Ok(false);
+      }
+      final f = File(outpath);
+      await f.writeAsBytes(bytes, flush: true);
+      return Ok(true);
+    } catch (e) {
+      return Err(e.toString());
+    }
   }
 }
