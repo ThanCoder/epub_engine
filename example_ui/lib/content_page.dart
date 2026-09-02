@@ -1,9 +1,10 @@
+import 'package:example_ui/html_page.dart';
+import 'package:example_ui/source_page.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 
 class ContentPage extends StatefulWidget {
-  const new({super.key, required this.content});
-  final String content;
+  const new({super.key, required this.htmls});
+  final List<String> htmls;
 
   @override
   State<ContentPage> createState() => _ContentPageState();
@@ -16,16 +17,14 @@ class _ContentPageState extends State<ContentPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: IndexedStack(
-            index: index,
-            children: [
-              HtmlWidget(widget.content),
-              SelectableText(widget.content),
-            ],
-          ),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: IndexedStack(
+          index: index,
+          children: [
+            HtmlPage(htmls: widget.htmls),
+            SourcePage(htmls: widget.htmls),
+          ],
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(

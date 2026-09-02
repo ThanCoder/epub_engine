@@ -15,9 +15,9 @@ sealed class IEpubCore {
 
   String getFullPathByHref(String href) {
     if (ctx.rootPath.isNotEmpty) {
-      return '${ctx.rootPath}/$href';
+      return '${ctx.rootPath}/${href.replaceAll('../', '')}';
     }
-    return href;
+    return href.replaceAll('../', '');
   }
 
   String getFullPathByItem(EpubManifestItem item) {

@@ -48,12 +48,12 @@ class _EpubReaderState extends State<EpubReader> {
       title: Text(item.idref),
       onTap: () async {
         clickedIdref = item.idref;
-        final content = item.contentText!;
+        final htmls = item.cacheHtmlList(
+          '/home/thancoder/projects/dart_plugins/epub_engine/cache',
+        );
         await Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (context) => ContentPage(content: content),
-          ),
+          MaterialPageRoute(builder: (context) => ContentPage(htmls: htmls)),
         );
         setState(() {});
       },
