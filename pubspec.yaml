@@ -2,16 +2,19 @@ name: epub_engine
 description: A starting point for Dart libraries or applications.
 version: 0.1.0
 repository: https://github.com/ThanCoder/epub_engine.git
+publish_to: none
 
 environment:
   sdk: ^3.13.0
 
 # Add regular dependencies here.
 dependencies:
-  archive: ^4.0.9
+  archive: ^4.2.0
   html: ^0.15.6
-  path: ^1.9.1
   xml: ^7.0.1
+  # than_miniz:
+  #   # git: https://github.com/ThanCoder/than_miniz.git
+  #   path: /home/thancoder/projects/dart_plugins/than_miniz
 
 dev_dependencies:
   lints: ^6.0.0
